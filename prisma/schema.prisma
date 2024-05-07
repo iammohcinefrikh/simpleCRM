@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model client {
+  clientId          Int       @id @default(autoincrement())
+  clientFirstName   String    @db.VarChar(255)
+  clientLastName    String    @db.VarChar(255)
+  clientAddress     String    @db.VarChar(255)
+  clientPhoneNumber String    @db.VarChar(255)
+  clientEmail       String    @unique(map: "clientEmail") @db.VarChar(255)
+  invoice           invoice[]
+}
+
+model enterprise {
+  enterpriseId                   Int       @id @default(autoincrement())
+  enterpriseCapital              Int
+  enterpriseWorkforceCount       Int
+  enterpriseAddress              String    @db.VarChar(255)
+  enterprisePhoneNumber          String    @db.VarChar(255)
+  enterpriseEmail                String    @unique(map: "enterpriseEmail") @db.VarChar(255)
+  enterpriseName                 String    @db.VarChar(255)
+  enterpriseHeadquartersLocation String    @db.VarChar(255)
+  enterpriseCreationDate         DateTime  @db.Date
+  enterpriseIdentifierNumber     String    @db.VarChar(255)
+  invoice                        invoice[]
+}
+
+model invoice {
+  invoiceId      Int              @id @default(autoincrement())
+  invoiceDate    DateTime         @db.Date
+  invoiceDueDate DateTime         @db.Date
+  invoiceAmount  Decimal          @db.Decimal(15, 2)
+  clientId       Int
+  enterpriseId   Int
+  client         client           @relation(fields: [clientId], references: [clientId], onDelete: NoAction, onUpdate: NoAction, map: "invoice_ibfk_1")
+  enterprise     enterprise       @relation(fields: [enterpriseId], references: [enterpriseId], onDelete: NoAction, onUpdate: NoAction, map: "invoice_ibfk_2")
+  invoicedetails invoicedetails[]
+
+  @@index([clientId], map: "clientId")
+  @@index([enterpriseId], map: "enterpriseId")
+}
+
+model invoicedetails {
+  productId       Int
+  invoiceId       Int
+  productQuantity Int
+  invoice         invoice @relation(fields: [invoiceId], references: [invoiceId], onDelete: Cascade, onUpdate: NoAction, map: "invoicedetails_ibfk_1")
+  product         product @relation(fields: [productId], references: [productId], onDelete: Cascade, onUpdate: NoAction, map: "invoicedetails_ibfk_2")
+
+  @@id([productId, invoiceId])
+  @@index([invoiceId], map: "invoiceId")
+}
+
+model product {
+  productId               Int              @id @default(autoincrement())
+  productName             String           @db.VarChar(255)
+  productBuyingPrice      Decimal          @db.Decimal(10, 2)
+  productSellingPrice     Decimal          @db.Decimal(10, 2)
+  productDimensions       String           @db.VarChar(255)
+  productWeight           Decimal          @db.Decimal(10, 2)
+  productProfitMarginRate Decimal          @db.Decimal(5, 2)
+  invoicedetails          invoicedetails[]
+  supplied_by             supplied_by[]
+}
+
+model supplied_by {
+  productId  Int
+  supplierId Int
+  product    product  @relation(fields: [productId], references: [productId], onDelete: Cascade, onUpdate: NoAction, map: "supplied_by_ibfk_1")
+  supplier   supplier @relation(fields: [supplierId], references: [supplierId], onDelete: Cascade, onUpdate: NoAction, map: "supplied_by_ibfk_2")
+
+  @@id([productId, supplierId])
+  @@index([supplierId], map: "supplierId")
+}
+
+model supplier {
+  supplierId               Int           @id @default(autoincrement())
+  supplierName             String        @db.VarChar(255)
+  supplierAddress          String        @db.VarChar(255)
+  supplierPhoneNumber      String        @db.VarChar(255)
+  supplierEmail            String        @unique(map: "supplierEmail") @db.VarChar(255)
+  supplierCreationDate     DateTime      @db.Date
+  supplierIdentifierNumber String        @db.VarChar(255)
+  supplied_by              supplied_by[]
+}

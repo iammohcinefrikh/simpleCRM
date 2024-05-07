@@ -1,0 +1,22 @@
+{
+  "name": "simplecrm",
+  "version": "1.0.0",
+  "description": "simplecrm CRUD API",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "Mohcine Frikh",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.13.0",
+    "express": "^4.19.2",
+    "prisma": "^5.13.0"
+  }
+}
